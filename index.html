@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/jspsych-psychophysics.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css"/>
+    <title>Visual Search Task</title>
+</head>
+<body> 
+</body>
+<script>
+
+    // Initialize jsPsych
+    const jsPsych = initJsPsych();
+
+    // Run in JATOS server?
+    const jatos_run = window.jatos !== undefined || false;
+
+    const timeline = [];  
+
+    const welcome = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p>Experiment under construction.</p></br>",
+    choices: ['Continue']
+    };
+
+    timeline.push(welcome);
+
+    jsPsych.run(timeline);
+
+</script>
+</html>
