@@ -7,6 +7,9 @@
     <script src="jspsych/jspsych.js"></script>
     <script src="jspsych/jspsych-psychophysics.js"></script>
     <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-fullscreen.js"></script>
+    <script src="jspsych/plugin-virtual-chinrest.js"></script>
+    <script src="src/helper.js"></script>
     <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css"/>
     <title>Visual Search Task</title>
 </head>
@@ -15,7 +18,14 @@
 <script>
 
     // Initialize jsPsych
-    const jsPsych = initJsPsych();
+    const jsPsych = initJsPsych({
+        on_finish: () => {
+            jsPsych.data.displayData();
+        }
+    });
+
+    console.log(trialLog);
+
 
     // Run in JATOS server?
     const jatos_run = window.jatos !== undefined || false;
@@ -29,6 +39,37 @@
     };
 
     timeline.push(welcome);
+
+    /*
+    Idea for conditional trials. Incude event in timeline but make it conditional to timelines variables
+    */
+    const resize = {
+        type: jsPsychVirtualChinrest,
+        blindspot_reps: 1,
+        resize_units: "none",
+        pixels_per_unit: 100
+    };
+    const full_on = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: true,
+        message: "<p>Antes de empezar, pulsa el botón para entrar en modo pantalla completa.</p>",
+        button_label: "Entrar en pantalla completa",
+    }
+
+    // Trial with psychophysics
+
+    const trial = {
+        type: jsPsychPsychophysics,
+        stimuli: () => {
+            // This fix the problem of sacle the whole canvas
+            const sF  = jsPsych.data.get().last(1).values()[0].px2deg;
+            return [...draw_display(sF*1, sF*0.1, sF*4, "circle", "red", 1, 5)]
+        },
+        choices: ['y', 'n'], // The participant can respond to the stimuli using the 'y' or 'n' key.
+        background_color: '#000000', // The HEX color means green.
+    };
+
+    timeline.push(resize, trial);
 
     jsPsych.run(timeline);
 
