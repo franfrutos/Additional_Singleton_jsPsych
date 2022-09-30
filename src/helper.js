@@ -39,8 +39,9 @@ const draw_line = (length, width, angle, x, y) => {
         line_length: length,
         line_width: width,
         angle: angle,
-        line_color: 'white', // You can use the HTML color name instead of the HEX color.,
+        line_color: 'white', 
         origin_center: true,
+        show_start_time: 500,
         startX: x,
         startY: y,
     };
@@ -69,7 +70,8 @@ const draw_circle = (radius, line_w, color, x, y) => {
         obj_type: 'circle',
         radius: radius,
         line_width: line_w,
-        line_color: color, // You can use the HTML color name instead of the HEX color.,
+        line_color: color,
+        show_start_time: 500,
         origin_center: true,
         startX: x,
         startY: y,
@@ -82,6 +84,7 @@ const draw_diamond = (length, line_w, color, x, y) => {
         startX: x,
         startY: y - length/2,
         origin_center: true,
+        show_start_time: 500,
         drawFunc: (stimulus, canvas, context, elapsedTime, sumOfStep, length0 = length, width = line_w, color0 = color) => {
             context.beginPath();
         
@@ -116,7 +119,7 @@ const create = (shape, radius, width, color, x, y, orientation) => {
     }
 }
 
-const draw_display = (radius, width, rho, dimensions, targetPos, singletonPos) => {
+const draw_display = (radius, width, rho, dimensions, targetPos, singletonPos, targetOri) => {
 
     const arr = [];
 
@@ -134,21 +137,18 @@ const draw_display = (radius, width, rho, dimensions, targetPos, singletonPos) =
 
         [x, y] = coordinates[i];
 
-        orientation = shuffle([0, 90])[0]
         
         if (i === targetPos) {
-            //Change this to make dimension variable 
             tSC = (shape === "circle") ? "diamond": "circle";
-            console.log(tSC)
+            orientation = (targetOri === "vertical") ? 90 : 0;
             stimuli = create(tSC, radius, width, color, x, y, orientation);
 
         } else if (i === singletonPos) {
-            //Change this to make dimension variable 
+            orientation = shuffle([0, 90])[0]
             singSC = (color === "red") ? "green": "red";
-            console.log(singSC)
             stimuli = create(shape, radius, width, singSC, x, y, orientation);
         } else {
-    
+            orientation = shuffle([0, 90])[0]
             stimuli = create(shape, radius, width, color, x, y, orientation);
     
         }
@@ -188,64 +188,70 @@ const zeros  = (m, n) => {
 }
 
 const trials = 720;
-let distractorAbsent = zeros(Math.floor(trials*(1-.66)+1), 8); //245 trials
-let distractorHigh = zeros(Math.floor(trials*(.66*.65)+1), 8); // 309 trials
-let distractorLow = zeros(Math.floor(trials*(.66*.35)), 8); // 166 trials
-
+let distractorAbsent, distractorHigh, distractorLow;
 const HPDL = random(0, 8);
+let trialLog = [];
 
-// Filling distractor absent with targets (2s = target):
-for (let i = 0; i < distractorAbsent.length; i++){
-    distractorAbsent[i][random(0, 8)] = 2;
+// Setting block structure
+for (let i = 0; i < 6; i++) {
+    distractorAbsent = zeros(Math.floor(40), 8); //No singleton
+    distractorHigh = zeros(Math.floor(52), 8); // HPDL
+    distractorLow = zeros(Math.floor(28), 8); // LPDL
+
+
+    let conditionLog = [];
+    // Filling distractor absent with targets (2s = target):
+    for (let i = 0; i < distractorAbsent.length; i++){
+        distractorAbsent[i][random(0, 8)] = 2;
+    }
+
+    // Filling distractactor HPDL (1s = singleton; 2s = target):
+    for (let i = 0; i < distractorHigh.length; i++){
+        distractorHigh[i][HPDL] = 1;
+        distractorHigh[i][random(0, 8, [HPDL])] = 2;
+    }
+
+    // Filling distractor low:
+    for (let i = 0; i < distractorLow.length; i++){
+        distractorLow[i][random(0, 8, [HPDL])] = 2;
+        distractorLow[i][random(0, 8, [HPDL, distractorLow[i].indexOf(2)])] = 1;
+    }
+
+    // Combining the arrays and randomize order:
+    conditionLog = shuffle(conditionLog.concat(
+        distractorAbsent,
+        distractorHigh,
+        distractorLow
+        ));
+    trialLog.push(conditionLog);
 }
 
-// Filling distractactor HPDL (1s = singleton; 2s = target):
-for (let i = 0; i < distractorHigh.length; i++){
-    distractorHigh[i][HPDL] = 1;
-    distractorHigh[i][random(0, 8, [HPDL])] = 2;
-}
+trialLog = [].concat(...trialLog);
 
-// Filling distractor low:
- for (let i = 0; i < distractorLow.length; i++){
-    distractorLow[i][random(0, 8, [HPDL])] = 2;
-    distractorLow[i][random(0, 8, [HPDL, distractorLow[i].indexOf(2)])] = 1;
-}
+console.log(trialLog)
 
-// Combining the arrays and randomize order:
-let conditionLog = [];
-conditionLog = shuffle(conditionLog.concat(
-    distractorAbsent,
-    distractorHigh,
-    distractorLow
-    ));
-
-/*Array coding the relevant shape target/singleton color:
-    0: diamond/red
-    1: circle/green
-    2: diamond/green
-    3: circle/red
-*/
+    /* Array coding the relevant shape target/singleton color:
+        0: diamond/red
+        1: circle/green
+        2: diamond/green
+        3: circle/red
+    */
 let dim = [];
-dim = shuffle(dim.concat(
+    dim = shuffle(dim.concat(
     Array.from({length: trials/4}).fill(0, 0, trials/4),
     Array.from({length: trials/4}).fill(1, 0, trials/4),
     Array.from({length: trials/4}).fill(2, 0, trials/4),
     Array.from({length: trials/4}).fill(3, 0, trials/4)
 ));
 
-
-let trialLog = [];
-for (let i = 0; i < conditionLog.length; i++){
-    trialLog.push({
-        conditionLog: conditionLog[i],
-        targetPos: conditionLog[i].indexOf(2),
-        singPos: conditionLog[i].indexOf(1),
+// Setting timeline array
+let trialObj = []
+for (let i = 0; i < trials; i++){
+    trialObj.push({
+        trialLog: trialLog[i],
+        targetPos: trialLog[i].indexOf(2),
+        singPos: trialLog[i].indexOf(1),
         dimension: dim[i],
+        orientation: shuffle(["horizontal", "vertical"])[0],
     })
 }
-// trialLog.forEach((e) => {
-//     let targetPos = e.posArray.indexOf(2);
-//     let singPos = (e.posArray.indexOf(1) >= 0)? e.posArray.indexOf(1): -2;
-
-//     e.stimuli = draw_display(1, 0.1, 4, 0, targetPos, singPos);
-// });

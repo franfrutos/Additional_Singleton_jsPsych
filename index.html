@@ -25,8 +25,6 @@
         }
     });
 
-    console.log(trialLog);
-
 
     // Run in JATOS server?
     const jatos_run = window.jatos !== undefined || false;
@@ -72,8 +70,7 @@
             const targetPos = jsPsych.timelineVariable("targetPos");
             const singPos = jsPsych.timelineVariable("singPos");
             const dimension = jsPsych.timelineVariable("dimension");
-            console.log(dimension);
-            return draw_display(1*sF, 0.1*sF, 4*sF, dimension, targetPos, singPos);
+            return draw_display(1*sF, 0.1*sF, 4*sF, dimension, targetPos, singPos, jsPsych.timelineVariable("orientation"));
         },
         choices: ['y', 'n'], 
         background_color: '#000000',
@@ -84,9 +81,6 @@
         canvas_height: () => {
             const sF  = jsPsych.data.get().last(1).values()[0].px2deg;
             return sF*11;
-        },
-        on_start: () => {
-            console.log(trialLog);
         },
         data: () => {
             const sPos = jsPsych.timelineVariable("singPos")
@@ -99,13 +93,16 @@
             }
         },
         on_finish: (data) => {
-
-        }
+            data.correct_response = (jsPsych.timelineVariable("orientation") == "vertical") ? "f":"c";
+            data.correct = (jsPsych.pluginAPI.compareKeys(data.response, data.correct_response))? 1: 0;
+        },
+        post_trial_gap: 500 + Math.floor(Math.random()*201),
+        trial_duration: 3000,
     };
 
     const procedure = {
         timeline: [trial],
-        timeline_variables: trialLog,
+        timeline_variables: trialObj,
         repetitions: 1,
         randomize_order: false,
     }
