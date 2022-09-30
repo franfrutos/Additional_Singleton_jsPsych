@@ -50,10 +50,12 @@
         resize_units: "none",
         on_finish: () => {
             //Fade to black transition
-            document.body.classList.add("black");
+            document.body.classList.add("black");;
         },
         post_trial_gap: 2000,
     };
+
+
     const full_on = {
         type: jsPsychFullscreen,
         fullscreen_mode: true,
@@ -61,17 +63,20 @@
         button_label: "Entrar en pantalla completa",
     }
 
-    // Trial with psychophysics
+    // Experimental trial
 
     const trial = {
         type: jsPsychPsychophysics,
         stimuli: () => {
-            // This fix the problem of sacle the whole canvas
             const sF  = jsPsych.data.get().last(1).values()[0].px2deg;
-            return [...draw_display(sF*1, sF*0.1, sF*4, "circle", "red", 1, 5)]
+            const targetPos = jsPsych.timelineVariable("targetPos");
+            const singPos = jsPsych.timelineVariable("singPos");
+            const dimension = jsPsych.timelineVariable("dimension");
+            console.log(dimension);
+            return draw_display(1*sF, 0.1*sF, 4*sF, dimension, targetPos, singPos);
         },
-        choices: ['y', 'n'], // The participant can respond to the stimuli using the 'y' or 'n' key.
-        background_color: '#000000', // The HEX color means green.
+        choices: ['y', 'n'], 
+        background_color: '#000000',
         canvas_width: () => {
             const sF  = jsPsych.data.get().last(1).values()[0].px2deg;
             return sF*11;
@@ -79,10 +84,33 @@
         canvas_height: () => {
             const sF  = jsPsych.data.get().last(1).values()[0].px2deg;
             return sF*11;
+        },
+        on_start: () => {
+            console.log(trialLog);
+        },
+        data: () => {
+            const sPos = jsPsych.timelineVariable("singPos")
+            return {
+                px2deg: jsPsych.data.get().last(1).values()[0].px2deg,
+                tPos: jsPsych.timelineVariable("targetPos"),
+                sPos: sPos,
+                counterbalance: jsPsych.timelineVariable("dimension"),
+                condition: (sPos < 0)? "Absent": (sPos === HPDL) ? "HPDL": "LPDL"
+            }
+        },
+        on_finish: (data) => {
+
         }
     };
 
-    timeline.push(resize, trial);
+    const procedure = {
+        timeline: [trial],
+        timeline_variables: trialLog,
+        repetitions: 1,
+        randomize_order: false,
+    }
+
+    timeline.push(resize, procedure);
 
     jsPsych.run(timeline);
 

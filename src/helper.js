@@ -116,9 +116,13 @@ const create = (shape, radius, width, color, x, y, orientation) => {
     }
 }
 
-const draw_display = (radius, width, rho, shape, color, targetPos, singletonPos) => {
+const draw_display = (radius, width, rho, dimensions, targetPos, singletonPos) => {
 
     const arr = [];
+
+    // Non-singleton distractor shape and color
+    let shape = (dimensions === 0 || dimensions === 2) ? "circle": "diamond";
+    let color = (dimensions === 1 || dimensions === 2) ? "red": "green";
 
     arr.push(...draw_cross(radius, width));
 
@@ -134,12 +138,14 @@ const draw_display = (radius, width, rho, shape, color, targetPos, singletonPos)
         
         if (i === targetPos) {
             //Change this to make dimension variable 
-            tSC = (shape === "diamond") ? "circle": "diamond";
+            tSC = (shape === "circle") ? "diamond": "circle";
+            console.log(tSC)
             stimuli = create(tSC, radius, width, color, x, y, orientation);
 
         } else if (i === singletonPos) {
             //Change this to make dimension variable 
             singSC = (color === "red") ? "green": "red";
+            console.log(singSC)
             stimuli = create(shape, radius, width, singSC, x, y, orientation);
         } else {
     
@@ -174,7 +180,7 @@ const random = (min, max, no) => {
     return rnum;
 }
 
-const zeros  = (m,n) => {
+const zeros  = (m, n) => {
     return Array.from({
         length: m
     }, 
@@ -205,13 +211,41 @@ for (let i = 0; i < distractorHigh.length; i++){
     distractorLow[i][random(0, 8, [HPDL, distractorLow[i].indexOf(2)])] = 1;
 }
 
-// Combining the arrays:
+// Combining the arrays and randomize order:
 let conditionLog = [];
-conditionLog = conditionLog.concat(
+conditionLog = shuffle(conditionLog.concat(
     distractorAbsent,
     distractorHigh,
     distractorLow
-    );
+    ));
 
-// Randomize order:
-trialLog = shuffle(conditionLog);
+/*Array coding the relevant shape target/singleton color:
+    0: diamond/red
+    1: circle/green
+    2: diamond/green
+    3: circle/red
+*/
+let dim = [];
+dim = shuffle(dim.concat(
+    Array.from({length: trials/4}).fill(0, 0, trials/4),
+    Array.from({length: trials/4}).fill(1, 0, trials/4),
+    Array.from({length: trials/4}).fill(2, 0, trials/4),
+    Array.from({length: trials/4}).fill(3, 0, trials/4)
+));
+
+
+let trialLog = [];
+for (let i = 0; i < conditionLog.length; i++){
+    trialLog.push({
+        conditionLog: conditionLog[i],
+        targetPos: conditionLog[i].indexOf(2),
+        singPos: conditionLog[i].indexOf(1),
+        dimension: dim[i],
+    })
+}
+// trialLog.forEach((e) => {
+//     let targetPos = e.posArray.indexOf(2);
+//     let singPos = (e.posArray.indexOf(1) >= 0)? e.posArray.indexOf(1): -2;
+
+//     e.stimuli = draw_display(1, 0.1, 4, 0, targetPos, singPos);
+// });
