@@ -11,6 +11,7 @@
     <script src="jspsych/plugin-virtual-chinrest.js"></script>
     <script src="src/helper.js"></script>
     <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css"/>
+    <link href="src/stylesheet.css" rel="stylesheet" type="text/css"/>
     <title>Visual Search Task</title>
 </head>
 <body> 
@@ -45,9 +46,13 @@
     */
     const resize = {
         type: jsPsychVirtualChinrest,
-        blindspot_reps: 1,
+        blindspot_reps: 3,
         resize_units: "none",
-        pixels_per_unit: 100
+        on_finish: () => {
+            //Fade to black transition
+            document.body.classList.add("black");
+        },
+        post_trial_gap: 2000,
     };
     const full_on = {
         type: jsPsychFullscreen,
@@ -67,6 +72,14 @@
         },
         choices: ['y', 'n'], // The participant can respond to the stimuli using the 'y' or 'n' key.
         background_color: '#000000', // The HEX color means green.
+        canvas_width: () => {
+            const sF  = jsPsych.data.get().last(1).values()[0].px2deg;
+            return sF*11;
+        },
+        canvas_height: () => {
+            const sF  = jsPsych.data.get().last(1).values()[0].px2deg;
+            return sF*11;
+        }
     };
 
     timeline.push(resize, trial);

@@ -112,7 +112,6 @@ const create = (shape, radius, width, color, x, y, orientation) => {
     if (shape == "diamond") {
         return [draw_diamond(radius*2, width, color, x, y), draw_line(radius, width, orientation, x, y)];
     } else {
-        console.log(shape, radius, width, color, x, y, orientation)
         return [draw_circle(radius, width, color, x, y), draw_line(radius, width, orientation, x, y)];
     }
 }
