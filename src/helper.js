@@ -172,10 +172,11 @@ const shuffle = (array) => {
 }
 
 const random = (min, max, no) => {
-    no = (typeof no !== 'undefined') ?  no : -1;
     let rnum = Math.floor(Math.random() * (max - min)) + min;
-    while (rnum == no) {
-        rnum = Math.floor(Math.random() * (max - min)) + min;
+    if (typeof no !== 'undefined'){
+        while (no.indexOf(rnum) >= 0) {
+            rnum = Math.floor(Math.random() * (max - min)) + min;
+        }
     }
     return rnum;
 }
@@ -228,7 +229,16 @@ for (let i = 0; i < 6; i++) {
 
 trialLog = [].concat(...trialLog);
 
-console.log(trialLog)
+// Array of WM task checks:
+let WMlog = []; let tmp; let base_trials = 0;
+for (let i = 0; i < 6; i++) {
+    tmp = shuffle([].concat(...Array(4).fill([8, 10, 12])));
+    tmp[0] = tmp[0] + base_trials;
+    WMSum = tmp.map((elem, index) => tmp.slice(0,index + 1).reduce((a, b) => (a + b)));
+    WMlog.push(WMSum);
+    base_trials += 120;
+}
+WMlog = [].concat(...WMlog);
 
     /* Array coding the relevant shape target/singleton color:
         0: diamond/red
@@ -236,6 +246,7 @@ console.log(trialLog)
         2: diamond/green
         3: circle/red
     */
+
 let dim = [];
     dim = shuffle(dim.concat(
     Array.from({length: trials/4}).fill(0, 0, trials/4),
@@ -245,13 +256,22 @@ let dim = [];
 ));
 
 // Setting timeline array
-let trialObj = []
+let trialObj = []; let check; let counter = 0;
 for (let i = 0; i < trials; i++){
+    if (WMlog[counter]-1 === i) {
+        check = "yes";
+        counter++;
+    } else {
+        check = "no";
+    }
     trialObj.push({
         trialLog: trialLog[i],
         targetPos: trialLog[i].indexOf(2),
         singPos: trialLog[i].indexOf(1),
         dimension: dim[i],
         orientation: shuffle(["horizontal", "vertical"])[0],
+        WMcheck: check,
     })
 }
+
+console.log(trialObj);
