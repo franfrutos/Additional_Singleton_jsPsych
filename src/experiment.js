@@ -21,16 +21,44 @@ const welcome = {
 
 timeline.push(welcome);
 
-// Virtual chin-rest
-const resize = {
-    type: jsPsychVirtualChinrest,
-    blindspot_reps: 3,
-    resize_units: "none",
+// Instructions
+const instructions1 = {
+    type:jsPsychInstructions,
+    pages: [
+        '<p>This is an example of instruction page. Press the left arrow to continue.</p>',
+        '<p>This is another page of the instructions.</p>',
+        '<p>Now, You have to do the virtual chin-rest.</p>'
+    ]
+}
+
+const instructions2 = {
+    type:jsPsychInstructions,
+    pages: [
+        '<p>This is an example of instruction page before the experiment begins. Press the left arrow to continue.</p>',
+        '<p>This is another page of the instructions.</p>',
+        `<p><strong>Press C</strong> if you see a horizontal line inside the different shape.</p></br>
+        <p><strong>Press F</strong> if you see a vertical line inside the different shape.</p></br>
+        <p>Press the left arrow to start the experiment</p>`
+    ],
+    data: () => {
+        // We need to save the scaling factor in every trial
+        const sF  = jsPsych.data.get().last(1).values()[0].px2deg;
+        return {
+            px2deg: sF,
+        }
+    },
     on_finish: () => {
         //Fade to black transition
         document.body.classList.add("black");
         document.body.style.cursor = 'none';
     },
+    post_trial_gap: 2000,
+}
+// Virtual chin-rest
+const resize = {
+    type: jsPsychVirtualChinrest,
+    blindspot_reps: 3,
+    resize_units: "none",
     post_trial_gap: 2000,
 };
 
@@ -189,6 +217,6 @@ const procedure = {
     randomize_order: false,
 }
 
-timeline.push(full_on, resize, procedure, full_off);
+timeline.push(instructions1, full_on, resize, instructions2, procedure, full_off);
 
 jsPsych.run(timeline);
