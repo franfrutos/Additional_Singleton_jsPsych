@@ -9,6 +9,11 @@ const jsPsych = initJsPsych({
 // Run in JATOS server?
 const jatos_run = window.jatos !== undefined || false;
 
+// Generating random ID and filename based on ID:
+const subject_id = jsPsych.randomization.randomID(10);
+const filename = `${subject_id}.csv`;
+
+
 const timeline = [];  
 
 let verticalCount = 0; let trialNum = 0; let check_Num = 0;
@@ -216,6 +221,15 @@ const procedure = {
     repetitions: 1,
     randomize_order: false,
 }
+
+
+const save_data = {
+    type: jsPsychPipe,
+    action: "save",
+    experiment_id: "cC4T3dGI0xAG",
+    filename: filename,
+    data: ()=>jsPsych.data.get().csv()
+  };
 
 timeline.push(instructions1, full_on, resize, instructions2, procedure, full_off);
 
