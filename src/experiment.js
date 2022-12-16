@@ -13,6 +13,8 @@ const jatos_run = window.jatos !== undefined || false;
 const subject_id = jsPsych.randomization.randomID(10);
 const filename = `${subject_id}.csv`;
 
+// Add a plataform validator for engine (only mozilla and google chrome) and only pc or laptop
+
 
 const timeline = [];  
 
@@ -231,6 +233,6 @@ const save_data = {
     data: ()=>jsPsych.data.get().csv()
   };
 
-timeline.push(instructions1, full_on, resize, instructions2, procedure, full_off);
+timeline.push(instructions1, full_on, resize, instructions2, procedure, full_off, save_data);
 
 jsPsych.run(timeline);
